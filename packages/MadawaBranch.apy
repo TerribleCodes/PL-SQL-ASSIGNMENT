@@ -1,0 +1,175 @@
+CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
+  -- INSERT BRANCH
+  PROCEDURE INSERT_BRANCH(company_reg_no_      IN VARCHAR2,
+                          branch_name_         IN VARCHAR2,
+                          branch_address_      IN VARCHAR2,
+                          branch_manager_      IN VARCHAR2,
+                          total_warehouse_cap_ IN NUMBER) IS
+    branch_id_ VARCHAR2(30);
+  BEGIN
+    SELECT MADAWA_BRANCH_SEQ.NEXTVAL INTO branch_id_ FROM DUAL;
+    INSERT INTO MADAWA_BRANCH_TAB
+      (company_reg_no,
+       branch_id,
+       branch_name,
+       branch_address,
+       branch_manager,
+       total_warehouse_cap)
+    VALUES
+      (company_reg_no_,
+       branch_id_,
+       branch_name_,
+       branch_address_,
+       branch_manager_,
+       total_warehouse_cap_);
+  END INSERT_BRANCH;
+
+  -- GET BRANCH NAME (By branch_id)
+  FUNCTION GET_BRNCH_NAME(branch_id_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(200);
+    CURSOR GET_BRN_NAME IS
+      SELECT branch_name
+        FROM MADAWA_BRANCH_TAB
+       WHERE branch_id = branch_id_;
+  
+  BEGIN
+    OPEN GET_BRN_NAME;
+    FETCH GET_BRN_NAME
+      INTO result_;
+    CLOSE GET_BRN_NAME;
+    RETURN result_;
+  END GET_BRNCH_NAME;
+
+  -- GET BRANCH ADDRESS (By branch_id)
+  FUNCTION GET_BRNCH_ADDR(branch_id_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(4000);
+    CURSOR GET_BRN_ADDR IS
+      SELECT branch_address
+        FROM MADAWA_BRANCH_TAB
+       WHERE branch_id = branch_id_;
+  
+  BEGIN
+    OPEN GET_BRN_ADDR;
+    FETCH GET_BRN_ADDR
+      INTO result_;
+    CLOSE GET_BRN_ADDR;
+    RETURN result_;
+  END GET_BRNCH_ADDR;
+
+  -- GET BRANCH MANAGER (By branch_id)
+  FUNCTION GET_BRNCH_MGR(branch_id_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(200);
+    CURSOR GET_BRN_MGR IS
+      SELECT branch_manager
+        FROM MADAWA_BRANCH_TAB
+       WHERE branch_id = branch_id_;
+  
+  BEGIN
+    OPEN GET_BRN_MGR;
+    FETCH GET_BRN_MGR
+      INTO result_;
+    CLOSE GET_BRN_MGR;
+    RETURN result_;
+  END GET_BRNCH_MGR;
+
+  -- GET TOTAL CAPACITY (By branch_id)
+  FUNCTION GET_TOTAL_CAP(branch_id_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ NUMBER;
+    CURSOR GET_TOT_CAP IS
+      SELECT total_warehouse_cap
+        FROM MADAWA_BRANCH_TAB
+       WHERE branch_id = branch_id_;
+  
+  BEGIN
+    OPEN GET_TOT_CAP;
+    FETCH GET_TOT_CAP
+      INTO result_;
+    CLOSE GET_TOT_CAP;
+    RETURN result_;
+  END GET_TOTAL_CAP;
+
+  -- GET REMAINING CAPACITY (By branch_id)
+  FUNCTION GET_REMN_CAP(branch_id_ IN VARCHAR2) RETURN NUMBER IS
+    result_ NUMBER;
+    CURSOR GET_REM_CAP IS
+      SELECT ((SELECT SUM(total_warehouse_cap) as total_cap
+                 FROM madawa_branch_tab
+                where branch_id = branch_id_) -
+             (SELECT SUM(max_volume) AS total_max_vol
+                 FROM MADAWA_CONTAINER_TAB
+                WHERE container_id IN
+                      (SELECT container_id
+                         FROM MADAWA_STORAGE_TAB
+                        WHERE status = 'Reserved') AND
+                      branch_id = branch_id_) -
+             (SELECT SUM(current_volume) AS total_used_vol
+                 FROM MADAWA_CONTAINER_TAB
+                WHERE container_id IN
+                      (SELECT container_id
+                         FROM MADAWA_STORAGE_TAB
+                        WHERE status = 'In Use') AND branch_id = branch_id_)) as remaining_used_vol
+        FROM dual;
+  
+  BEGIN
+    OPEN GET_REM_CAP;
+    FETCH GET_REM_CAP
+      INTO result_;
+    CLOSE GET_REM_CAP;
+    RETURN result_;
+  END GET_REMN_CAP;
+
+  -- GET CURRENT INVENTORY INFORMATION (By branch_id)
+  PROCEDURE GET_CURRNT_INV(branch_id_ IN VARCHAR2) AS
+  BEGIN
+    FOR i IN (SELECT *
+                FROM MADAWA_STORAGE_TAB
+               WHERE container_id IN
+                     (SELECT container_id
+                        FROM MADAWA_CONTAINER_TAB
+                       WHERE branch_id = branch_id_)) LOOP
+      DBMS_OUTPUT.PUT_LINE('Container ID: ' || i.container_id);
+      DBMS_OUTPUT.PUT_LINE('Item ID: ' || i.item_id);
+      DBMS_OUTPUT.PUT_LINE('Status: ' || i.status);
+    END LOOP;
+  END GET_CURRNT_INV;
+
+  -- UPDATE BRANCH
+  PROCEDURE UPDATE_BRANCH(company_reg_no_      IN VARCHAR2,
+                          branch_id_           IN VARCHAR2,
+                          branch_name_         IN VARCHAR2,
+                          branch_address_      IN VARCHAR2,
+                          branch_manager_      IN VARCHAR2,
+                          total_warehouse_cap_ IN NUMBER) AS
+  BEGIN
+    UPDATE MADAWA_BRANCH_TAB
+       SET branch_name         = branch_name_,
+           branch_address      = branch_address_,
+           branch_manager      = branch_manager_,
+           total_warehouse_cap = total_warehouse_cap_
+     WHERE company_reg_no = company_reg_no_ AND branch_id = branch_id_;
+    COMMIT;
+  END UPDATE_BRANCH;
+
+  -- DELETE BRANCH
+  PROCEDURE DELETE_BRANCH(company_reg_no_ IN VARCHAR2,
+                          branch_id_      IN VARCHAR2) AS
+  BEGIN
+    DELETE FROM MADAWA_FOOD_ITEM_TAB
+     WHERE item_id IN (SELECT item_id
+                         FROM MADAWA_STORAGE_TAB
+                        WHERE container_id IN
+                              (SELECT container_id
+                                 FROM MADAWA_CONTAINER_TAB
+                                WHERE branch_id = branch_id_));
+    DELETE FROM MADAWA_STORAGE_TAB
+     WHERE container_id IN (SELECT container_id
+                              FROM MADAWA_CONTAINER_TAB
+                             WHERE branch_id = branch_id_);
+    DELETE FROM MADAWA_CONTAINER_TAB WHERE branch_id = branch_id_;
+    DELETE FROM MADAWA_BRANCH_TAB
+     WHERE company_reg_no = company_reg_no_ AND branch_id = branch_id_;
+    COMMIT;
+  END DELETE_BRANCH;
+
+END MADAWA_BRANCH_API;
+/

@@ -1,0 +1,16 @@
+CREATE TABLE MADAWA_CONTAINER_TAB (
+    company_reg_no VARCHAR2(30),
+    branch_id VARCHAR2(30),
+    container_id VARCHAR2(30),
+    max_volume NUMBER,
+    max_weight NUMBER,
+    current_volume NUMBER,
+    current_weight NUMBER,
+    PRIMARY KEY (company_reg_no, branch_id, container_id)
+);
+
+CREATE SEQUENCE MADAWA_CONTAINER_SEQ
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE;

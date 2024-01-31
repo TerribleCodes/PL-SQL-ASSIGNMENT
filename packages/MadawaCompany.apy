@@ -1,0 +1,102 @@
+CREATE OR REPLACE PACKAGE BODY MADAWA_COMPANY_API AS
+  -- CREATE COMPANY
+  PROCEDURE INSERT_COMPANY(company_name_    IN VARCHAR2,
+                           company_address_ IN VARCHAR2) IS
+    company_reg_no_ VARCHAR2(30);
+  BEGIN
+    SELECT MADAWA_COMPANY_SEQ.NEXTVAL INTO company_reg_no_ FROM DUAL;
+    INSERT INTO MADAWA_COMPANY_TAB
+      (company_reg_no, company_name, company_address)
+    VALUES
+      (company_reg_no_, company_name_, company_address_);
+  END INSERT_COMPANY;
+
+  -- GET COMPANY NAME (BY company_reg_no)
+  FUNCTION GET_COMP_NAME(company_reg_no_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(200);
+    CURSOR GET_CMP_NAME IS
+      SELECT company_name
+        FROM MADAWA_COMPANY_TAB
+       WHERE company_reg_no = company_reg_no_;
+  BEGIN
+    OPEN GET_CMP_NAME;
+    FETCH GET_CMP_NAME
+      INTO result_;
+    CLOSE GET_CMP_NAME;
+    RETURN result_;
+  END GET_COMP_NAME;
+
+  -- GET COMPANY REGISTRATION NUMBER (By company_name)
+  FUNCTION GET_COMP_REG_NO(company_name_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(30);
+    CURSOR GET_CMP_RG_NO IS
+      SELECT company_reg_no
+        FROM MADAWA_COMPANY_TAB
+       WHERE company_name = company_name_;
+  BEGIN
+    OPEN GET_CMP_RG_NO;
+    FETCH GET_CMP_RG_NO
+      INTO result_;
+    CLOSE GET_CMP_RG_NO;
+    RETURN result_;
+  END GET_COMP_REG_NO;
+
+  -- GET COMPANY ADDRESS (By company_reg_no)
+  FUNCTION GET_COMP_ADDR(company_reg_no_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(4000);
+    CURSOR GET_CMP_ADDR IS
+      SELECT company_address
+        FROM MADAWA_COMPANY_TAB
+       WHERE company_reg_no = company_reg_no_;
+  BEGIN
+    OPEN GET_CMP_ADDR;
+    FETCH GET_CMP_ADDR
+      INTO result_;
+    CLOSE GET_CMP_ADDR;
+    RETURN result_;
+  END GET_COMP_ADDR;
+
+  -- UPDATE COMPANY
+  PROCEDURE UPDATE_COMPANY(company_reg_no_  VARCHAR2,
+                           company_name_    VARCHAR2,
+                           company_address_ VARCHAR2) AS
+  BEGIN
+    UPDATE MADAWA_COMPANY_TAB
+       SET company_name = company_name_, company_address = company_address_
+     WHERE company_reg_no = company_reg_no_;
+    COMMIT;
+  END UPDATE_COMPANY;
+
+  -- DELETE COMPANY
+  PROCEDURE DELETE_COMPANY(company_reg_no_ VARCHAR2) AS
+  BEGIN
+    DELETE FROM MADAWA_FOOD_ITEM_TAB
+     WHERE item_id IN
+           (SELECT item_id
+              FROM MADAWA_STORAGE_TAB
+             WHERE container_id IN
+                   (SELECT container_id
+                      FROM MADAWA_CONTAINER_TAB
+                     WHERE branch_id IN
+                           (SELECT branch_id
+                              FROM MADAWA_BRANCH_TAB
+                             WHERE company_reg_no = company_reg_no_)));
+    DELETE FROM MADAWA_STORAGE_TAB
+     WHERE container_id IN
+           (SELECT container_id
+              FROM MADAWA_CONTAINER_TAB
+             WHERE branch_id IN
+                   (SELECT branch_id
+                      FROM MADAWA_BRANCH_TAB
+                     WHERE company_reg_no = company_reg_no_));
+    DELETE FROM MADAWA_CONTAINER_TAB
+     WHERE branch_id IN
+           (SELECT branch_id
+              FROM MADAWA_BRANCH_TAB
+             WHERE company_reg_no = company_reg_no_);
+    DELETE FROM MADAWA_BRANCH_TAB WHERE company_reg_no = company_reg_no_;
+    DELETE FROM MADAWA_COMPANY_TAB WHERE company_reg_no = company_reg_no_;
+    COMMIT;
+  END DELETE_COMPANY;
+END MADAWA_COMPANY_API;
+/

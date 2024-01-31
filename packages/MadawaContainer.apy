@@ -1,0 +1,82 @@
+CREATE OR REPLACE PACKAGE BODY MADAWA_CONTAINER_API AS
+  -- INSERT CONTAINER
+  PROCEDURE INSERT_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             max_volume_     IN NUMBER,
+                             max_weight_     IN NUMBER,
+                             current_volume_ IN NUMBER,
+                             current_weight_ IN NUMBER,
+                             container_id_   IN VARCHAR2 DEFAULT NULL) IS
+    generated_container_id_ VARCHAR2(30);
+  BEGIN
+    IF container_id_ IS NOT NULL THEN
+      generated_container_id_ := container_id_;
+    ELSE
+      SELECT MADAWA_CONTAINER_SEQ.NEXTVAL
+        INTO generated_container_id_
+        FROM DUAL;
+    END IF;
+  
+    INSERT INTO MADAWA_CONTAINER_TAB
+      (company_reg_no,
+       branch_id,
+       container_id,
+       max_volume,
+       max_weight,
+       current_volume,
+       current_weight)
+    VALUES
+      (company_reg_no_,
+       branch_id_,
+       generated_container_id_,
+       max_volume_,
+       max_weight_,
+       current_volume_,
+       current_weight_);
+  END INSERT_CONTAINER;
+
+  -- UPDATE CONTAINER
+  PROCEDURE UPDATE_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             container_id_   IN VARCHAR2,
+                             max_volume_     IN NUMBER,
+                             max_weight_     IN NUMBER,
+                             current_volume_ IN NUMBER,
+                             current_weight_ IN NUMBER) AS
+  BEGIN
+    UPDATE MADAWA_CONTAINER_TAB
+       SET max_volume     = max_volume_,
+           max_weight     = max_weight_,
+           current_volume = current_volume_,
+           current_weight = current_weight_
+     WHERE company_reg_no = company_reg_no_ AND branch_id = branch_id_ AND
+           container_id = container_id_;
+    COMMIT;
+  END UPDATE_CONTAINER;
+
+  -- DELETE CONTAINER
+  PROCEDURE DELETE_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             container_id_   IN VARCHAR2) AS
+  BEGIN
+    DELETE FROM MADAWA_FOOD_ITEM_TAB
+     WHERE item_id IN
+           (SELECT item_id
+              FROM MADAWA_STORAGE_TAB
+             WHERE container_id IN
+                   (SELECT container_id
+                      FROM MADAWA_CONTAINER_TAB
+                     WHERE container_id = container_id_));
+    DELETE FROM MADAWA_STORAGE_TAB
+     WHERE container_id IN
+           (SELECT container_id
+              FROM MADAWA_CONTAINER_TAB
+             WHERE container_id = container_id_);
+    DELETE FROM MADAWA_CONTAINER_TAB
+     WHERE company_reg_no = company_reg_no_ AND branch_id = branch_id_ AND
+           container_id = container_id_;
+    COMMIT;
+  END DELETE_CONTAINER;
+
+END MADAWA_CONTAINER_API;
+/

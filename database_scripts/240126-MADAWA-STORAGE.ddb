@@ -1,0 +1,6 @@
+CREATE TABLE MADAWA_STORAGE_TAB (
+    item_id VARCHAR2(30),
+    container_id VARCHAR2(30),
+    status VARCHAR2(20),
+    PRIMARY KEY (item_id, container_id)
+);

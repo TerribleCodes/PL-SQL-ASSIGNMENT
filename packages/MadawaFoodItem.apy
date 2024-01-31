@@ -1,0 +1,117 @@
+CREATE OR REPLACE PACKAGE BODY MADAWA_FOOD_ITEM_API AS
+  -- INSERT FOOD ITEM
+  PROCEDURE INSERT_FOOD_ITEM(available_qty_ IN NUMBER,
+                             scrapped_qty_  IN NUMBER,
+                             reserved_qty_  IN NUMBER,
+                             item_name_     IN VARCHAR2,
+                             item_id_       IN VARCHAR2 DEFAULT NULL) IS
+    generated_item_id_ VARCHAR2(30);
+  BEGIN
+    IF item_id_ IS NOT NULL THEN
+      generated_item_id_ := item_id_;
+    ELSE
+      SELECT MADAWA_FOODITEM_SEQ.NEXTVAL INTO generated_item_id_ FROM DUAL;
+    END IF;
+  
+    INSERT INTO MADAWA_FOOD_ITEM_TAB
+      (item_id, available_qty, scrapped_qty, reserved_qty, item_name)
+    VALUES
+      (generated_item_id_,
+       available_qty_,
+       scrapped_qty_,
+       reserved_qty_,
+       item_name_);
+  END INSERT_FOOD_ITEM;
+
+  -- GET ITEM NAME (By item_id)
+  FUNCTION GET_ITEM_NAME(item_id_ IN VARCHAR2) RETURN VARCHAR2 IS
+    result_ VARCHAR2(30);
+    CURSOR GET_ITM_NAME IS
+      SELECT item_name FROM MADAWA_FOOD_ITEM_TAB WHERE item_id = item_id_;
+  
+  BEGIN
+    OPEN GET_ITM_NAME;
+    FETCH GET_ITM_NAME
+      INTO result_;
+    CLOSE GET_ITM_NAME;
+    RETURN result_;
+  END GET_ITEM_NAME;
+
+  -- GET AVAILABLE QUANTITY (By item_id)
+  FUNCTION GET_AVAIL_QTY(item_id_ IN VARCHAR2) RETURN NUMBER IS
+    result_ NUMBER;
+    CURSOR GET_AVL_QTY IS
+      SELECT available_qty
+        FROM MADAWA_FOOD_ITEM_TAB
+       WHERE item_id = item_id_;
+  
+  BEGIN
+    OPEN GET_AVL_QTY;
+    FETCH GET_AVL_QTY
+      INTO result_;
+    CLOSE GET_AVL_QTY;
+    RETURN result_;
+  END GET_AVAIL_QTY;
+
+  -- GET SCRAPPED QUANTITY (By item_id)
+  FUNCTION GET_SCARPP_QTY(item_id_ IN VARCHAR2) RETURN NUMBER IS
+    result_ NUMBER;
+    CURSOR GET_SCRP_QTY IS
+      SELECT scrapped_qty
+        FROM MADAWA_FOOD_ITEM_TAB
+       WHERE item_id = item_id_;
+  
+  BEGIN
+    OPEN GET_SCRP_QTY;
+    FETCH GET_SCRP_QTY
+      INTO result_;
+    CLOSE GET_SCRP_QTY;
+    RETURN result_;
+  END GET_SCARPP_QTY;
+
+  -- GET RESERVED QUANTITY (By item_id)
+  FUNCTION GET_RSVED_QTY(item_id_ IN VARCHAR2) RETURN NUMBER IS
+    result_ NUMBER;
+    CURSOR GET_RSV_QTY IS
+      SELECT reserved_qty
+        FROM MADAWA_FOOD_ITEM_TAB
+       WHERE item_id = item_id_;
+  
+  BEGIN
+    OPEN GET_RSV_QTY;
+    FETCH GET_RSV_QTY
+      INTO result_;
+    CLOSE GET_RSV_QTY;
+    RETURN result_;
+  END GET_RSVED_QTY;
+
+  -- UPDATE FOOD ITEM
+  PROCEDURE UPDATE_FOOD_ITEM(item_id_       IN VARCHAR2,
+                             available_qty_ IN NUMBER,
+                             scrapped_qty_  IN NUMBER,
+                             reserved_qty_  IN NUMBER,
+                             item_name_     IN VARCHAR2) AS
+  BEGIN
+    UPDATE MADAWA_FOOD_ITEM_TAB
+       SET available_qty = available_qty_,
+           scrapped_qty  = scrapped_qty_,
+           reserved_qty  = reserved_qty_,
+           item_name     = item_name_
+     WHERE item_id = item_id_;
+    COMMIT;
+  END UPDATE_FOOD_ITEM;
+
+  -- DELETE FOOD ITEM
+  PROCEDURE DELETE_FOOD_ITEM(item_id_ IN VARCHAR2) AS
+  BEGIN
+    UPDATE MADAWA_CONTAINER_TAB
+       SET current_volume = 0, current_weight = 0
+     WHERE container_id IN (SELECT container_id
+                              FROM MADAWA_STORAGE_TAB
+                             WHERE item_id = item_id_);
+    DELETE FROM MADAWA_STORAGE_TAB WHERE item_id = item_id_;
+    DELETE FROM MADAWA_FOOD_ITEM_TAB WHERE item_id = item_id_;
+    COMMIT;
+  END DELETE_FOOD_ITEM;
+END MADAWA_FOOD_ITEM_API;
+/

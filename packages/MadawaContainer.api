@@ -1,0 +1,20 @@
+CREATE OR REPLACE PACKAGE MADAWA_CONTAINER_API AS
+  PROCEDURE INSERT_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             max_volume_     IN NUMBER,
+                             max_weight_     IN NUMBER,
+                             current_volume_ IN NUMBER,
+                             current_weight_ IN NUMBER,
+                             container_id_   IN VARCHAR2 DEFAULT NULL);
+  PROCEDURE UPDATE_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             container_id_   IN VARCHAR2,
+                             max_volume_     IN NUMBER,
+                             max_weight_     IN NUMBER,
+                             current_volume_ IN NUMBER,
+                             current_weight_ IN NUMBER);
+  PROCEDURE DELETE_CONTAINER(company_reg_no_ IN VARCHAR2,
+                             branch_id_      IN VARCHAR2,
+                             container_id_   IN VARCHAR2);
+END MADAWA_CONTAINER_API;
+/

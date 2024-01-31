@@ -1,0 +1,22 @@
+CREATE OR REPLACE PACKAGE MADAWA_BRANCH_API AS
+  PROCEDURE INSERT_BRANCH(company_reg_no_      IN VARCHAR2,
+                          branch_name_         IN VARCHAR2,
+                          branch_address_      IN VARCHAR2,
+                          branch_manager_      IN VARCHAR2,
+                          total_warehouse_cap_ IN NUMBER);
+  FUNCTION GET_BRNCH_NAME(branch_id_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_BRNCH_ADDR(branch_id_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_BRNCH_MGR(branch_id_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_TOTAL_CAP(branch_id_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_REMN_CAP(branch_id_ IN VARCHAR2) RETURN NUMBER;
+  PROCEDURE GET_CURRNT_INV(branch_id_ IN VARCHAR2);
+  PROCEDURE UPDATE_BRANCH(company_reg_no_      IN VARCHAR2,
+                          branch_id_           IN VARCHAR2,
+                          branch_name_         IN VARCHAR2,
+                          branch_address_      IN VARCHAR2,
+                          branch_manager_      IN VARCHAR2,
+                          total_warehouse_cap_ IN NUMBER);
+  PROCEDURE DELETE_BRANCH(company_reg_no_ IN VARCHAR2,
+                          branch_id_      IN VARCHAR2);
+END MADAWA_BRANCH_API;
+/

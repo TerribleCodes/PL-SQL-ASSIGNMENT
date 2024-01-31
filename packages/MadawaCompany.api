@@ -1,0 +1,12 @@
+CREATE OR REPLACE PACKAGE MADAWA_COMPANY_API AS
+  PROCEDURE INSERT_COMPANY(company_name_    IN VARCHAR2,
+                           company_address_ IN VARCHAR2);
+  FUNCTION GET_COMP_NAME(company_reg_no_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_COMP_REG_NO(company_name_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_COMP_ADDR(company_reg_no_ IN VARCHAR2) RETURN VARCHAR2;
+  PROCEDURE UPDATE_COMPANY(company_reg_no_  VARCHAR2,
+                           company_name_    VARCHAR2,
+                           company_address_ VARCHAR2);
+  PROCEDURE DELETE_COMPANY(company_reg_no_ VARCHAR2);
+END MADAWA_COMPANY_API;
+/

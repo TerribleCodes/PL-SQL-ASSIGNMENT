@@ -1,0 +1,18 @@
+CREATE OR REPLACE PACKAGE MADAWA_FOOD_ITEM_API AS
+  PROCEDURE INSERT_FOOD_ITEM(available_qty_ IN NUMBER,
+                             scrapped_qty_  IN NUMBER,
+                             reserved_qty_  IN NUMBER,
+                             item_name_     IN VARCHAR2,
+                             item_id_       IN VARCHAR2 DEFAULT NULL);
+  FUNCTION GET_ITEM_NAME(item_id_ IN VARCHAR2) RETURN VARCHAR2;
+  FUNCTION GET_AVAIL_QTY(item_id_ IN VARCHAR2) RETURN NUMBER;
+  FUNCTION GET_SCARPP_QTY(item_id_ IN VARCHAR2) RETURN NUMBER;
+  FUNCTION GET_RSVED_QTY(item_id_ IN VARCHAR2) RETURN NUMBER;
+  PROCEDURE UPDATE_FOOD_ITEM(item_id_       IN VARCHAR2,
+                             available_qty_ IN NUMBER,
+                             scrapped_qty_  IN NUMBER,
+                             reserved_qty_  IN NUMBER,
+                             item_name_     IN VARCHAR2);
+  PROCEDURE DELETE_FOOD_ITEM(item_id_ IN VARCHAR2);
+END MADAWA_FOOD_ITEM_API;
+/

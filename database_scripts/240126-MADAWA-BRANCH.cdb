@@ -1,0 +1,15 @@
+CREATE TABLE MADAWA_BRANCH_TAB (
+    company_reg_no VARCHAR2(30),
+    branch_id VARCHAR2(30),
+    branch_name VARCHAR2(200),
+    branch_address VARCHAR2(4000),
+    branch_manager VARCHAR2(200),
+    total_warehouse_cap NUMBER,
+    PRIMARY KEY (company_reg_no, branch_id)
+);
+
+CREATE SEQUENCE MADAWA_BRANCH_SEQ
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE;
