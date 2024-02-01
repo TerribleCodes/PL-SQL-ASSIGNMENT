@@ -101,13 +101,7 @@ CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
                       (SELECT container_id
                          FROM MADAWA_STORAGE_TAB
                         WHERE status = 'Reserved') AND
-                      branch_id = branch_id_) -
-             (SELECT SUM(current_volume) AS total_used_vol
-                 FROM MADAWA_CONTAINER_TAB
-                WHERE container_id IN
-                      (SELECT container_id
-                         FROM MADAWA_STORAGE_TAB
-                        WHERE status = 'In Use') AND branch_id = branch_id_)) as remaining_used_vol
+                      branch_id = branch_id_)) as remaining_used_vol
         FROM dual;
   
   BEGIN
@@ -122,14 +116,17 @@ CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
   PROCEDURE GET_CURRNT_INV(branch_id_ IN VARCHAR2) AS
   BEGIN
     FOR i IN (SELECT *
-                FROM MADAWA_STORAGE_TAB
-               WHERE container_id IN
-                     (SELECT container_id
-                        FROM MADAWA_CONTAINER_TAB
-                       WHERE branch_id = branch_id_)) LOOP
-      DBMS_OUTPUT.PUT_LINE('Container ID: ' || i.container_id);
+                FROM MADAWA_FOOD_ITEM_TAB
+               WHERE item_id IN
+                     (SELECT item_id
+                        FROM MADAWA_STORAGE_TAB
+                       WHERE container_id IN
+                             (SELECT container_id
+                                FROM MADAWA_CONTAINER_TAB WHERE branch_id = branch_id_))) LOOP
+      DBMS_OUTPUT.PUT_LINE('Item Name: ' || i.item_name);
       DBMS_OUTPUT.PUT_LINE('Item ID: ' || i.item_id);
-      DBMS_OUTPUT.PUT_LINE('Status: ' || i.status);
+      DBMS_OUTPUT.PUT_LINE('Available Quantity: ' || i.available_qty);
+      DBMS_OUTPUT.PUT_LINE('Scrapped Quantity: ' || i.scrapped_qty);
     END LOOP;
   END GET_CURRNT_INV;
 
@@ -172,4 +169,3 @@ CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
   END DELETE_BRANCH;
 
 END MADAWA_BRANCH_API;
-/
