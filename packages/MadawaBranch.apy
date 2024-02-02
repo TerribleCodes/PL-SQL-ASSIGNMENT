@@ -114,15 +114,17 @@ CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
 
   -- GET CURRENT INVENTORY INFORMATION (By branch_id)
   PROCEDURE GET_CURRNT_INV(branch_id_ IN VARCHAR2) AS
+    CURSOR GET_CUR_INV IS
+      SELECT *
+        FROM MADAWA_FOOD_ITEM_TAB
+       WHERE item_id IN (SELECT item_id
+                           FROM MADAWA_STORAGE_TAB
+                          WHERE container_id IN
+                                (SELECT container_id
+                                   FROM MADAWA_CONTAINER_TAB
+                                  WHERE branch_id = branch_id_));
   BEGIN
-    FOR i IN (SELECT *
-                FROM MADAWA_FOOD_ITEM_TAB
-               WHERE item_id IN
-                     (SELECT item_id
-                        FROM MADAWA_STORAGE_TAB
-                       WHERE container_id IN
-                             (SELECT container_id
-                                FROM MADAWA_CONTAINER_TAB WHERE branch_id = branch_id_))) LOOP
+    FOR i IN GET_CUR_INV LOOP
       DBMS_OUTPUT.PUT_LINE('Item Name: ' || i.item_name);
       DBMS_OUTPUT.PUT_LINE('Item ID: ' || i.item_id);
       DBMS_OUTPUT.PUT_LINE('Available Quantity: ' || i.available_qty);
