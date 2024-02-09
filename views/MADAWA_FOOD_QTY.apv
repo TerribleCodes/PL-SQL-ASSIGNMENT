@@ -1,0 +1,7 @@
+CREATE OR REPLACE VIEW MADAWA_BRN_FOOD_QTY AS
+SELECT b.branch_name AS BRANCH_NAME, f.available_qty AS AVAILABLE_FOOD_QUANTITY
+FROM MADAWA_BRANCH_TAB b
+JOIN MADAWA_CONTAINER_TAB c ON b.branch_id = c.branch_id
+JOIN MADAWA_STORAGE_TAB s ON c.container_id = s.container_id
+JOIN MADAWA_FOOD_ITEM_TAB f ON s.item_id = f.item_id
+GROUP BY b.branch_name;

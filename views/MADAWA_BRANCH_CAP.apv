@@ -1,0 +1,14 @@
+CREATE OR REPLACE VIEW MADAWA_BRNCH_CAP_INF AS
+SELECT
+    b.branch_name AS BRANCH_NAME,
+    c.current_volume AS CURRENT_VOLUME,
+    c.current_weight AS CURRENT_WEIGHT,
+    f.available_qty
+FROM
+    MADAWA_BRANCH_TAB b
+JOIN
+    MADAWA_CONTAINER_TAB c ON b.branch_id = c.branch_id
+JOIN
+    MADAWA_STORAGE_TAB s ON c.container_id = s.container_id
+JOIN
+    MADAWA_FOOD_ITEM_TAB f ON s.item_id = f.item_id;

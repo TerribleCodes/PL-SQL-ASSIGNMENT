@@ -112,6 +112,41 @@ CREATE OR REPLACE PACKAGE BODY MADAWA_BRANCH_API AS
     RETURN result_;
   END GET_REMN_CAP;
 
+  -- GET THE NUMBER OF OVERLOADED BRANCHES
+  FUNCTION OVERLOADED_BRANCHES RETURN NUMBER IS
+    branch_count NUMBER := 0; -- I've initialized a branch_counter so it can be returned as the number of branches with more than the given capacity
+    CURSOR all_branches IS
+      SELECT * FROM madawa_branch_tab;
+  BEGIN
+    FOR i IN all_branches LOOP
+      DECLARE
+        total_cap          NUMBER;
+        total_max_vol      NUMBER;
+        remaining_used_vol NUMBER;
+      BEGIN
+        SELECT SUM(total_warehouse_cap)
+          INTO total_cap
+          FROM madawa_branch_tab
+         WHERE branch_id = i.branch_id;
+      
+        SELECT SUM(max_volume)
+          INTO total_max_vol
+          FROM MADAWA_CONTAINER_TAB
+         WHERE container_id IN (SELECT container_id
+                                  FROM MADAWA_STORAGE_TAB
+                                 WHERE status = 'Reserved') AND
+               branch_id = i.branch_id;
+      
+        remaining_used_vol := total_cap - total_max_vol;
+      
+        IF i.total_warehouse_cap < remaining_used_vol THEN
+          branch_count := branch_count + 1;
+        END IF;
+      END;
+    END LOOP;
+    RETURN branch_count;
+  END OVERLOADED_BRANCHES;
+
   -- GET CURRENT INVENTORY INFORMATION (By branch_id)
   PROCEDURE GET_CURRNT_INV(branch_id_ IN VARCHAR2) AS
     CURSOR GET_CUR_INV IS
